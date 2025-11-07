@@ -6,7 +6,8 @@ import asyncio, json, time, threading, os
 API_ID = 33886333
 API_HASH = "979753e6fdb91479f7153d533788e87f"
 SESSION = "askplex_session"
-TARGET = "askplexbot"  # without @
+from telethon.tl.types import InputPeerUser
+TARGET = InputPeerUser(user_id=8131321158, access_hash=7356519516453717310)
 
 app = Flask(__name__)
 
@@ -70,3 +71,4 @@ if __name__ == "__main__":
     asyncio.run_coroutine_threadsafe(client.start(), loop)
     print(f"✅ Telegram started for @{TARGET}")
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
