@@ -14,7 +14,9 @@ loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 client = TelegramClient(SESSION, API_ID, API_HASH, loop=loop)
 
-# Reply listener
+# ============================
+# Telegram Reply Listener
+# ============================
 @client.on(events.NewMessage(from_users=TARGET.user_id))
 async def handle_reply(event):
     msg = event.raw_text.strip()
@@ -22,6 +24,10 @@ async def handle_reply(event):
         print(f"📩 {msg}")
         with open("reply.json", "w", encoding="utf-8") as f:
             json.dump({"reply": msg, "timestamp": time.time()}, f)
+
+# ============================
+# Flask Routes
+# ============================
 
 @app.route("/", methods=["GET"])
 def health():
@@ -46,6 +52,24 @@ def send_msg():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
+
+@app.route("/reply", methods=["GET"])
+def get_latest_reply():
+    """Fetch the most recent saved reply."""
+    try:
+        with open("reply.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return jsonify({
+            "ok": True,
+            "reply": data.get("reply", ""),
+            "timestamp": data.get("timestamp")
+        })
+    except FileNotFoundError:
+        return jsonify({"ok": False, "error": "No reply yet"}), 404
+
+# ============================
+# Background Event Loop
+# ============================
 def loop_forever():
     asyncio.set_event_loop(loop)
     loop.run_forever()
